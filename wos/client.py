@@ -35,6 +35,7 @@ class WosClient():
         self._auth = _suds.client.Client(self.auth_url, **options)
         self._search = _suds.client.Client(search_wsdl, **options)
         self._throttle_wait = _limit(*throttle)(lambda: True)
+        self._databaseId = 'WOS'
 
         if user and password:
             auth = '%s:%s' % (user, password)
@@ -56,6 +57,9 @@ class WosClient():
         """Close connection when deleting the object."""
         if self._close_on_exit:
             self.close()
+
+    def set_databaseId(self, id):
+        self._databaseId = id
 
     def is_lite(self):
         """Returns True if the client is for WOS lite"""
@@ -183,7 +187,7 @@ class WosClient():
         query = query.decode('utf-8') if _version_info[0] < 3 else query
         return self._search.service.search(
             queryParameters=_OrderedDict([
-                ('databaseId', 'WOS'),
+                ('databaseId', self._databaseId),
                 ('userQuery', query),
                 ('editions', editions),
                 ('symbolicTimeSpan', symbolicTimeSpan),
@@ -246,7 +250,7 @@ class WosClient():
                              is used.
         """
         return self._search.service.retrieveById(
-            databaseId='WOS',
+            databaseId=self._databaseId,
             uid=uid,
             queryLanguage='en',
             retrieveParameters=(retrieveParameters or
@@ -274,7 +278,7 @@ class WosClient():
                              is used.
         """
         return self._search.service.citedReferences(
-            databaseId='WOS',
+            databaseId=self._databaseId,
             uid=uid,
             queryLanguage='en',
             retrieveParameters=(retrieveParameters or
@@ -349,7 +353,7 @@ class WosClient():
                              is used.
         """
         return self._search.service.citingArticles(
-            databaseId='WOS',
+            databaseId=self._databaseId,
             uid=uid,
             editions=editions,
             timeSpan=timeSpan,
@@ -397,7 +401,7 @@ class WosClient():
                              is used.
         """
         return self._search.service.relatedRecords(
-            databaseId='WOS',
+            databaseId=self._databaseId,
             uid=uid,
             editions=editions,
             timeSpan=timeSpan,
